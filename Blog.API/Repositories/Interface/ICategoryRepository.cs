@@ -5,6 +5,8 @@ namespace Blog.API.Repositories.Interface
     public interface ICategoryRepository
     {
         Task<IEnumerable<Category>> GetAllAsync();
-        Task<Category> CreateAsync(Category category);  
+        Task<Category> GetById(Guid id);
+        Task<Category?> CreateAsync(Category category);      
+        Task<Category?> UpdateAsync(Category category);
     }
 }

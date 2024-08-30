@@ -40,6 +40,27 @@ namespace Blog.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
+        {
+            var existingCategory = await _categoryRepository.GetById(id);
+
+            if(existingCategory == null)
+            {
+                return NotFound();
+            }
+
+            var response = new CategoryDto
+            {
+                Id = existingCategory.Id,
+                Name = existingCategory.Name,
+                UrlHandle = existingCategory.UrlHandle
+            };
+
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request)
         {
@@ -52,6 +73,34 @@ namespace Blog.API.Controllers
 
             await _categoryRepository.CreateAsync(category);
           
+            var response = new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                UrlHandle = category.UrlHandle
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, UpdateCategoryRequestDto request)
+        {
+            var category = new Category
+            {
+                Id = id,
+                Name = request.Name,
+                UrlHandle = request.UrlHandle
+            };
+
+            category = await _categoryRepository.UpdateAsync(category);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             var response = new CategoryDto
             {
                 Id = category.Id,
