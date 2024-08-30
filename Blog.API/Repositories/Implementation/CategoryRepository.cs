@@ -1,6 +1,7 @@
 ﻿using Blog.API.Data;
 using Blog.API.Models.Domain;
 using Blog.API.Repositories.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Repositories.Implementation
 {
@@ -11,6 +12,11 @@ namespace Blog.API.Repositories.Implementation
         public CategoryRepository(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<IEnumerable<Category>> GetAllAsync()
+        {
+            return await _context.Categories.ToListAsync();
         }
 
         public async Task<Category> CreateAsync(Category category)

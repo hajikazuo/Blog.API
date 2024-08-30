@@ -21,6 +21,25 @@ namespace Blog.API.Controllers
             _comb = comb;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllCategories()
+        { 
+            var categories = await _categoryRepository.GetAllAsync();
+
+            var response = new List<CategoryDto>();
+            foreach (var category in categories)
+            {
+                response.Add(new CategoryDto
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    UrlHandle = category.UrlHandle
+                });
+            }
+
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request)
         {
