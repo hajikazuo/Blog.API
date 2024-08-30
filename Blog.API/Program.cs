@@ -27,6 +27,17 @@ namespace Blog.API
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddSingleton(RT.Comb.Provider.Sql);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("BlogOrigins",
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -37,6 +48,8 @@ namespace Blog.API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("BlogOrigins");
 
             app.UseAuthorization();
 
