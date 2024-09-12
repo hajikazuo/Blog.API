@@ -16,7 +16,12 @@ namespace Blog.API.Repositories.Implementation
 
         public async Task<IEnumerable<BlogPost>> GetAllAsync()
         {
-            return await _context.BlogPosts.ToListAsync();
+            return await _context.BlogPosts.Include(c => c.Categories).ToListAsync();
+        }
+
+        public async Task<BlogPost?> GetByIdAsync(Guid id)
+        {
+            return await _context.BlogPosts.Include(c => c.Categories).FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task<BlogPost> CreateAsync(BlogPost blogPost)

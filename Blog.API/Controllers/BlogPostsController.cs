@@ -13,11 +13,13 @@ namespace Blog.API.Controllers
     public class BlogPostsController : ControllerBase
     {
         private readonly IBlogPostRepository _blogPostRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly ICombProvider _comb;
 
-        public BlogPostsController(IBlogPostRepository blogPostRepository, ICombProvider comb)
+        public BlogPostsController(IBlogPostRepository blogPostRepository, ICategoryRepository categoryRepository, ICombProvider comb)
         {
-            _blogPostRepository = blogPostRepository;
+            _blogPostRepository = blogPostRepository;            
+            _categoryRepository = categoryRepository;
             _comb = comb;
         }
 
@@ -40,15 +42,54 @@ namespace Blog.API.Controllers
                     UrlHandle = blogPost.UrlHandle,
                     PublishedDate = blogPost.PublishedDate,
                     Author = blogPost.Author,
-                    isVisible = blogPost.isVisible
+                    isVisible = blogPost.isVisible,
+                    Categories = blogPost.Categories.Select(c => new CategoryDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        UrlHandle = c.UrlHandle
+                    }).ToList()
                 });
             }
 
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetBlogPostById([FromRoute]Guid id)
+        {
+            var blogPost = await _blogPostRepository.GetByIdAsync(id);
+
+            if(blogPost is null)
+            {
+                return NotFound();
+            }
+
+            var response = new BlogPostDto
+            {
+                Id = blogPost.Id,
+                Title = blogPost.Title,
+                ShortDescription = blogPost.ShortDescription,
+                Content = blogPost.Content,
+                FeaturedImageUrl = blogPost.FeaturedImageUrl,
+                UrlHandle = blogPost.UrlHandle,
+                PublishedDate = blogPost.PublishedDate,
+                Author = blogPost.Author,
+                isVisible = blogPost.isVisible,
+                Categories = blogPost.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                }).ToList()
+            };
+
+            return Ok(response);    
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequestDto request)
+        public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequestDto request) 
         {
             var blogPost = new BlogPost
             {
@@ -60,8 +101,18 @@ namespace Blog.API.Controllers
                 UrlHandle = request.UrlHandle,
                 PublishedDate = request.PublishedDate,
                 Author = request.Author,
-                isVisible = request.isVisible
+                isVisible = request.isVisible,
+                Categories = new List<Category>()
             };
+
+            foreach(var categoryGuid in request.Categories)
+            {
+                var existingCategory = await _categoryRepository.GetById(categoryGuid);
+                if(existingCategory is not null)
+                {
+                    blogPost.Categories.Add(existingCategory);
+                }
+            }
 
             blogPost = await _blogPostRepository.CreateAsync(blogPost);
 
@@ -75,7 +126,13 @@ namespace Blog.API.Controllers
                 UrlHandle = blogPost.UrlHandle,
                 PublishedDate = blogPost.PublishedDate,
                 Author = blogPost.Author,
-                isVisible = blogPost.isVisible
+                isVisible = blogPost.isVisible,
+                Categories = blogPost.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                }).ToList()
             };
 
             return Ok(response);
