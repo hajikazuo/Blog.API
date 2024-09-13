@@ -137,5 +137,61 @@ namespace Blog.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> UpdateBlogPost([FromRoute] Guid id, UpdateBlogPostRequestDto request)
+        {
+            var blogPost = new BlogPost
+            {
+                Id = id,
+                Title = request.Title,
+                ShortDescription = request.ShortDescription,
+                Content = request.Content,
+                FeaturedImageUrl = request.FeaturedImageUrl,
+                UrlHandle = request.UrlHandle,
+                PublishedDate = request.PublishedDate,
+                Author = request.Author,
+                isVisible = request.isVisible,
+                Categories = new List<Category>()
+            };
+
+            foreach (var categoryGuid in request.Categories)
+            {
+                var existingCategory = await _categoryRepository.GetById(categoryGuid);
+                if (existingCategory is not null)
+                {
+                    blogPost.Categories.Add(existingCategory);
+                }
+            }
+
+            var updatedBlogPost = await _blogPostRepository.UpdateAsync(blogPost);
+
+            if(updatedBlogPost == null)
+            {
+                return NotFound();
+            }
+
+            var response = new BlogPostDto
+            {
+                Id = blogPost.Id,
+                Title = blogPost.Title,
+                ShortDescription = blogPost.ShortDescription,
+                Content = blogPost.Content,
+                FeaturedImageUrl = blogPost.FeaturedImageUrl,
+                UrlHandle = blogPost.UrlHandle,
+                PublishedDate = blogPost.PublishedDate,
+                Author = blogPost.Author,
+                isVisible = blogPost.isVisible,
+                Categories = blogPost.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                }).ToList()
+            };
+
+            return Ok(response);
+        }
     }
 }
