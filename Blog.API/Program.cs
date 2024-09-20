@@ -15,6 +15,8 @@ namespace Blog.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddHttpContextAccessor();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -26,7 +28,8 @@ namespace Blog.API
 
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IBlogPostRepository, BlogPostRepository>();
-            builder.Services.AddSingleton(RT.Comb.Provider.Sql);
+            builder.Services.AddScoped<IImageRepository, ImageRepository>();
+            builder.Services.AddSingleton(RT.Comb.Provider.Sql);           
 
             builder.Services.AddCors(options =>
             {
