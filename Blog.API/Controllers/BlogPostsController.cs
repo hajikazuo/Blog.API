@@ -88,6 +88,39 @@ namespace Blog.API.Controllers
             return Ok(response);    
         }
 
+        [HttpGet]
+        [Route("{urlHandle}")]
+        public async Task<IActionResult> GetBlogPostByUrlHandle([FromRoute] string urlHandle)
+        {
+            var blogPost = await _blogPostRepository.GetByUrlHandleAsync(urlHandle);
+
+            if (blogPost is null)
+            {
+                return NotFound();
+            }
+
+            var response = new BlogPostDto
+            {
+                Id = blogPost.Id,
+                Title = blogPost.Title,
+                ShortDescription = blogPost.ShortDescription,
+                Content = blogPost.Content,
+                FeaturedImageUrl = blogPost.FeaturedImageUrl,
+                UrlHandle = blogPost.UrlHandle,
+                PublishedDate = blogPost.PublishedDate,
+                Author = blogPost.Author,
+                isVisible = blogPost.isVisible,
+                Categories = blogPost.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                }).ToList()
+            };
+
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequestDto request) 
         {
