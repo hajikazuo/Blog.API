@@ -3,6 +3,7 @@ using Blog.API.Data;
 using Blog.API.Repositories.Implementation;
 using Blog.API.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 namespace Blog.API
 {
@@ -57,6 +58,11 @@ namespace Blog.API
 
             app.UseAuthorization();
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+                RequestPath = "/Images"
+            });
 
             app.MapControllers();
 

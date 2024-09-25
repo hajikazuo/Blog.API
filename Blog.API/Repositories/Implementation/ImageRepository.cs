@@ -1,6 +1,7 @@
 ﻿using Blog.API.Data;
 using Blog.API.Models.Domain;
 using Blog.API.Repositories.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Repositories.Implementation
 {
@@ -15,6 +16,12 @@ namespace Blog.API.Repositories.Implementation
             _httpContextAccessor = httpContextAccessor;
             _context = context;
         }
+
+        public async Task<IEnumerable<BlogImage>> GetAll()
+        {
+            return await _context.BlogImages.ToListAsync();
+        }
+
         public async Task<BlogImage> Upload(IFormFile file, BlogImage blogImage)
         {
             var localPath = Path.Combine(_webHostEnvironment.ContentRootPath, "images", $"{blogImage.FileName}{blogImage.FileExtension}");
