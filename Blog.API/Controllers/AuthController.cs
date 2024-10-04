@@ -36,7 +36,7 @@ namespace Blog.API.Controllers
                         Token = "TOKEN"
                     };
 
-                    return Ok();
+                    return Ok(response);
                 }
             }
             ModelState.AddModelError("", "Invalid email or password");
