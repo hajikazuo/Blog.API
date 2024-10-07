@@ -23,7 +23,6 @@ namespace Blog.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllCategories()
         { 
             var categories = await _categoryRepository.GetAllAsync();
@@ -64,6 +63,7 @@ namespace Blog.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request)
         {
             var category = new Category
@@ -87,6 +87,7 @@ namespace Blog.API.Controllers
 
         [HttpPut]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, UpdateCategoryRequestDto request)
         {
             var category = new Category
@@ -115,6 +116,7 @@ namespace Blog.API.Controllers
 
         [HttpDelete]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var category = await _categoryRepository.DeleteAsync(id);

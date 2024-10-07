@@ -2,6 +2,7 @@
 using Blog.API.Models.DTO;
 using Blog.API.Repositories.Implementation;
 using Blog.API.Repositories.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RT.Comb;
@@ -122,6 +123,7 @@ namespace Blog.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequestDto request) 
         {
             var blogPost = new BlogPost
@@ -173,6 +175,7 @@ namespace Blog.API.Controllers
 
         [HttpPut]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> UpdateBlogPost([FromRoute] Guid id, UpdateBlogPostRequestDto request)
         {
             var blogPost = new BlogPost
@@ -229,6 +232,7 @@ namespace Blog.API.Controllers
 
         [HttpDelete]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> DeleteBlogPost([FromRoute] Guid id)
         {
             var deletedBlogPost = await _blogPostRepository.DeleteAsync(id);

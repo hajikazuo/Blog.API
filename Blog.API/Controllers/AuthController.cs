@@ -1,4 +1,5 @@
 ﻿using Blog.API.Models.DTO;
+using Blog.API.Repositories.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace Blog.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ITokenRepository _tokenRepository;
 
-        public AuthController(UserManager<IdentityUser> userManager)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository)
         {
             _userManager = userManager;
+            _tokenRepository = tokenRepository;
         }
 
         [HttpPost]
@@ -29,11 +32,13 @@ namespace Blog.API.Controllers
                 if(checkPasswordResult)
                 {
                     var roles = await _userManager.GetRolesAsync(identityUser);
+
+                    var jwtToken = _tokenRepository.CreateJwtToken(identityUser, roles.ToList());   
                     var response = new LoginResponseDto()
                     {
                         Email = identityUser.Email,
                         Roles = roles.ToList(),
-                        Token = "TOKEN"
+                        Token = jwtToken
                     };
 
                     return Ok(response);

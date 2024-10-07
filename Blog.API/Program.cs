@@ -39,6 +39,7 @@ namespace Blog.API
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IBlogPostRepository, BlogPostRepository>();
             builder.Services.AddScoped<IImageRepository, ImageRepository>();
+            builder.Services.AddScoped<ITokenRepository, TokenRepository>();
             builder.Services.AddSingleton(RT.Comb.Provider.Sql);
 
             builder.Services.AddIdentityCore<IdentityUser>()
