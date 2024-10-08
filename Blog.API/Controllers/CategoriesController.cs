@@ -23,9 +23,14 @@ namespace Blog.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<IActionResult> GetAllCategories(
+            [FromQuery] string? query,
+            [FromQuery] string? sortBy, 
+            [FromQuery] string? sortDirection,
+            [FromQuery] int? pageNumber,
+            [FromQuery] int? pageSize)
         { 
-            var categories = await _categoryRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync(query, sortBy, sortDirection, pageNumber, pageSize);
 
             var response = new List<CategoryDto>();
             foreach (var category in categories)
@@ -134,6 +139,15 @@ namespace Blog.API.Controllers
             };
 
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("count")]
+        public async Task<IActionResult> GetCategoriesTotal()
+        {
+            var count = await _categoryRepository.GetCount();
+
+            return Ok(count);
         }
     }
 }

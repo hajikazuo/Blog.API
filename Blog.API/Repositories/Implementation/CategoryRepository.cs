@@ -1,6 +1,7 @@
 ﻿using Blog.API.Data;
 using Blog.API.Models.Domain;
 using Blog.API.Repositories.Interface;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Repositories.Implementation
@@ -14,9 +15,42 @@ namespace Blog.API.Repositories.Implementation
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllAsync()
+        public async Task<IEnumerable<Category>> GetAllAsync(
+            string? query = null,
+            string? sortBy = null,
+            string? sortDirection = null,
+            int? pageNumber = 1,
+            int? pageSize = 100)
         {
-            return await _context.Categories.ToListAsync();
+            var categories = _context.Categories.AsQueryable();
+
+            if (string.IsNullOrWhiteSpace(query) == false)
+            {
+                categories = categories.Where(x => x.Name.Contains(query));
+            }
+
+            if (string.IsNullOrWhiteSpace(sortBy) == false)
+            {
+                if (string.Equals(sortBy, "Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    var isAsc = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase) ? true : false;
+
+                    categories = isAsc ? categories.OrderBy(x => x.Name) : categories.OrderByDescending(x => x.Name);
+                }
+
+                if (string.Equals(sortBy, "URL", StringComparison.OrdinalIgnoreCase))
+                {
+                    var isAsc = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase) ? true : false;
+
+                    categories = isAsc ? categories.OrderBy(x => x.UrlHandle) : categories.OrderByDescending(x => x.UrlHandle);
+                }
+            }
+
+            var skipResults = (pageNumber - 1) * pageSize;
+
+            categories = categories.Skip(skipResults ?? 0).Take(pageSize ?? 100);
+
+            return await categories.ToListAsync();
         }
 
         public async Task<Category> GetById(Guid id)
@@ -57,6 +91,11 @@ namespace Blog.API.Repositories.Implementation
             _context.Categories.Remove(existingCategory);
             await _context.SaveChangesAsync();
             return existingCategory;
+        }
+
+        public async Task<int> GetCount()
+        {
+            return await _context.Categories.CountAsync();
         }
     }
 }

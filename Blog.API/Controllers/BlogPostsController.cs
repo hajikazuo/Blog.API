@@ -25,9 +25,13 @@ namespace Blog.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBlogPosts()
+        public async Task<IActionResult> GetAllBlogPosts([FromQuery] string? query,
+            [FromQuery] string? sortBy,
+            [FromQuery] string? sortDirection,
+            [FromQuery] int? pageNumber,
+            [FromQuery] int? pageSize)
         {
-            var blogPosts = await _blogPostRepository.GetAllAsync();
+            var blogPosts = await _blogPostRepository.GetAllAsync(query, sortBy, sortDirection, pageNumber, pageSize);
 
             var response = new List<BlogPostDto>();
 
@@ -256,6 +260,15 @@ namespace Blog.API.Controllers
             };
 
             return Ok(response);    
+        }
+
+        [HttpGet]
+        [Route("count")]
+        public async Task<IActionResult> GetBlogPostsTotal()
+        {
+            var count = await _blogPostRepository.GetCount();
+
+            return Ok(count);
         }
     }
 }

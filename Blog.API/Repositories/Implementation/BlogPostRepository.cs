@@ -14,9 +14,43 @@ namespace Blog.API.Repositories.Implementation
             _context = context;
         }
 
-        public async Task<IEnumerable<BlogPost>> GetAllAsync()
+        public async Task<IEnumerable<BlogPost>> GetAllAsync(string? query = null,
+            string? sortBy = null,
+            string? sortDirection = null,
+            int? pageNumber = 1,
+            int? pageSize = 100)
         {
-            return await _context.BlogPosts.Include(c => c.Categories).ToListAsync();
+            var blogPosts = _context.BlogPosts.Include(c => c.Categories).AsQueryable();
+
+            if (string.IsNullOrWhiteSpace(query) == false)
+            {
+                blogPosts = blogPosts.Where(x => x.Title.Contains(query));
+            }
+
+            if (string.IsNullOrWhiteSpace(sortBy) == false)
+            {
+                if (string.Equals(sortBy, "Title", StringComparison.OrdinalIgnoreCase))
+                {
+                    var isAsc = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase) ? true : false;
+
+                    blogPosts = isAsc ? blogPosts.OrderBy(x => x.Title) : blogPosts.OrderByDescending(x => x.Title);
+                }
+
+                if (string.Equals(sortBy, "Description", StringComparison.OrdinalIgnoreCase))
+                {
+                    var isAsc = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase) ? true : false;
+
+                    blogPosts = isAsc ? blogPosts.OrderBy(x => x.ShortDescription) : blogPosts.OrderByDescending(x => x.ShortDescription);
+                }
+            }
+
+            var skipResults = (pageNumber - 1) * pageSize;
+
+            blogPosts = blogPosts.Skip(skipResults ?? 0).Take(pageSize ?? 100);
+
+            return await blogPosts.ToListAsync();
+
+
         }
 
         public async Task<BlogPost?> GetByIdAsync(Guid id)
@@ -66,6 +100,10 @@ namespace Blog.API.Repositories.Implementation
             }
 
             return null;
+        }
+        public async Task<int> GetCount()
+        {
+            return await _context.BlogPosts.CountAsync();
         }
     }
 }
